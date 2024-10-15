@@ -16,16 +16,22 @@ class Grass:
 
 
 class Boy:
-    def __init__(self):
+    image = None
+
+    def __init__(self): # 객체의 초기 상태 정의
         self.x, self.y = random.randint(0, 800), 90
         self.frame = 0
-        self.image = load_image('run_animation.png')
+        # 객체 생성마다 이미지를 로드중 -> 비효율적
+        #self.image = load_image('run_animation.png')
+        if Boy.image == None:
+            Boy.image = load_image('run_animation.png')
 
     def update(self):
         self.frame = (self.frame + 1) % 8
         self.x += 5
 
     def draw(self):
+        # self.image는 없지만 클래스 변수가 객체 변수를 대체
         self.image.clip_draw(self.frame * 100, 0, 100, 100, self.x, self.y)
 
 
@@ -51,7 +57,7 @@ def reset_world():
     grass = Grass()
     world.append(grass)
 
-    team = [Boy() for i in range(10)]
+    team = [Boy() for i in range(10000)]
     world += team
 
 
