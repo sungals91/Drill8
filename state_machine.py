@@ -2,6 +2,9 @@
 # 상태 이벤트 e = (종류, 실제값) 튜플로 정의
 from sdl2 import *
 
+def a_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
+
 def start_event(e):
     return e[0] == 'START'
 

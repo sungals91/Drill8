@@ -11,6 +11,10 @@ class Idle:
     def enter(boy, e):
         boy.start_time = get_time() # 현재 시간을 저장
         boy.frame = 0
+        if boy.dir == 1:
+            boy.action = 3
+        elif boy.dir == -1:
+            boy.action = 2
         boy.dir = 0 # 정지상태
         if left_up(e) or right_down(e):
             boy.action = 2
@@ -24,7 +28,7 @@ class Idle:
     @staticmethod
     def do(boy): # 파라미터로 boy를 쓰나 a를 쓰나 같음
         boy.frame = (boy.frame + 1) % 8
-        if get_time() - boy.start_time > 3:
+        if get_time() - boy.start_time > 5:
             boy.state_machine.add_event(('TIME_OUT', 0))
     @staticmethod
     def draw(boy):
@@ -81,6 +85,41 @@ class Run:
         )
         pass
 
+class Autorun:
+    @staticmethod
+    def enter(boy, e):
+        boy.start_time = get_time()
+        if start_event(e):
+            boy.dir = 1
+            boy.action = 1
+            boy.face_dir = 1
+        if boy.face_dir == 1:
+            boy.dir = 1
+        else:
+            boy.dir = -1
+        boy.frame = 0
+    @staticmethod
+    def exit(boy, e):
+        pass
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + 1) % 8
+        boy.x += boy.dir * 20
+        if  boy.x >= 770 or boy.x <= 30:
+            boy.face_dir = boy.face_dir * -1
+            boy.dir = boy.dir * -1
+        if get_time() - boy.start_time > 5:
+            boy.state_machine.add_event(('TIME_OUT', 0))
+    @staticmethod
+    def draw(boy):
+        if boy.face_dir == 1:
+            boy.image.clip_composite_draw(
+                boy.frame * 100, 100, 100, 100, 0, '', boy.x, boy.y + 30, 200, 200
+            )
+        elif boy.face_dir == -1:
+            boy.image.clip_composite_draw(
+                boy.frame * 100, 100, 100, 100, 0, 'h', boy.x, boy.y + 30, 200, 200
+            )
 
 
 class Boy:
@@ -92,11 +131,12 @@ class Boy:
         self.image = load_image('animation_sheet.png')
         self.state_machine = StateMachine(self) # 소년 객체의 스테이트머신 생성
         # 상태를 나타낼 떄 필요한 4가지 Do activity, Exit action, Entry action + draw
-        self.state_machine.start(Idle) # 초기상태 결정
+        self.state_machine.start(Autorun) # 초기상태 결정
         self.state_machine.set_transitions(
             {
+                Autorun : {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Idle},
                 Run : {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle}, # Run 상태에서 어떤 이벤트가 들어와도 처리하지 않겠다
-                Idle : {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep},
+                Idle : {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, a_down: Autorun},
                 Sleep : {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down : Idle}
             }
         )
