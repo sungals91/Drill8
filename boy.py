@@ -131,7 +131,7 @@ class Boy:
         self.image = load_image('animation_sheet.png')
         self.state_machine = StateMachine(self) # 소년 객체의 스테이트머신 생성
         # 상태를 나타낼 떄 필요한 4가지 Do activity, Exit action, Entry action + draw
-        self.state_machine.start(Autorun) # 초기상태 결정
+        self.state_machine.start(Idle) # 초기상태 결정
         self.state_machine.set_transitions(
             {
                 Autorun : {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Idle},
